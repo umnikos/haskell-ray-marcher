@@ -1,3 +1,5 @@
+{-# LANGUAGE DeriveGeneric #-}
+
 -------------------------------------------------
 -- Haskell Raytracer
 -- 26 Dec 2000
@@ -50,6 +52,10 @@
 
 -- NB: We have a right handed coordinate system.  If x increases to your right, and Y increases downwards then
 -- you are looking in the direction of increasing Z.
+
+import           Data.Binary
+import           GHC.Generics     (Generic)
+import           System.IO.Unsafe (unsafePerformIO)
 
 type Vector3 = (Float, Float, Float)
 
@@ -173,6 +179,15 @@ type Radius = Float
 data Shape = Sphere Point3 Radius (Point3 -> Material)
            | Plane Normal Float (Point3 -> Material)
 
+data BShape = BSphere Point3 Radius (Color, Float, Float)
+           | BPlane Normal Float (Color, Float, Float)
+           deriving (Generic)
+
+instance Binary BShape
+
+bshapeToShape (BSphere p r c) = Sphere p r (\_->c)
+bshapeToShape (BPlane n f c)  = Plane n f (\_->c)
+
 -- Plane is defined by a normal (its a 2 sided plane though) and a distance.
 -- The plane coincident with y=5 and normal (0,0,1) has distance -5.
 
@@ -242,11 +257,17 @@ ambient_light :: Color
 ambient_light = (0.1,0.1,0.1)
 
 -- What Shapes are in our scene?
+{-
 shapes :: [Shape]
 shapes = [ Plane (normalize (0,(-1),0)) 50 shinyred,
      Sphere (50,10,100) 40 semishinygreen,
      Sphere (350,10,100) 40 semishinygreen,
      Sphere (-80,0,80) 50 checked_matt]
+-}
+shapes :: [Shape]
+shapes = unsafePerformIO $ do
+  bscene <- decodeFile "scene"
+  return $ map bshapeToShape bscene
 
 ---------------------------------------------------------------------------------------
 -- Local lighting model
