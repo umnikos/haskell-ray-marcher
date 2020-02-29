@@ -56,6 +56,8 @@
 import           Data.Binary
 import           GHC.Generics     (Generic)
 import           System.IO.Unsafe (unsafePerformIO)
+import qualified Graphics.Image as G
+import           System.FilePath (replaceExtension)
 
 type Vector3 = (Float, Float, Float)
 
@@ -387,4 +389,18 @@ render_to_pgm width height = let view = ( (0,0,-100), 100, (0,0,100), (0,-1,0))
                                  color_collection = map (raytrace 0) ray_collection
                              in make_pgm (round width) (round height) color_collection
 
-main = do writeFile "test.ppm" (render_to_pgm 500 500)
+
+type PPMImage = (G.Image G.VS G.RGB Word8)
+
+convertPPMToPng :: IO ()
+convertPPMToPng = do 
+   img  <- G.readImageExact' G.PPM "test.ppm" :: IO(PPMImage)
+   G.writeImageExact G.PNG [] "test.png" img 
+   return ()	
+
+
+main = do
+  writeFile "test.ppm" (render_to_pgm 500 500)
+  convertPPMToPng
+  
+  
