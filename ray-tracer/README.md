@@ -7,6 +7,7 @@ This raytracer is purely for research purposes. It renders a scene, consisting o
 http://www.nobugs.org/developer/htrace/
 
 ## Added features:
+- Source is now broken up into different files.
 - Scene is created in a separate binary file, which is later read from.
 - The PPM output is converted to the lighter PNG format.
 
