@@ -1,8 +1,7 @@
-module Color(
-  Color(..)
+module Color
+  ( Color
   , colorize
-)
-where
+  ) where
 
 import Vector
 import Scene
