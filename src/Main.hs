@@ -1,8 +1,8 @@
-import Color
-import Light
+import Scene
+import Vector
+import Scene
 import Ray
-import Shapes
-import Camera
+import Color
 
 
 main :: IO ()

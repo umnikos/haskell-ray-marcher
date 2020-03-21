@@ -1,32 +1,14 @@
-module Ray
-  ( Ray (..)
-  , rayIntersection
-) where
+module Ray(
+  Ray(..)
 
-import Linear
-import Linear.Affine
-import Shapes
+)
+where
 
-data Ray = Ray { rayOrigin :: Point V3 Double -- Point origin
-               , rayDirection :: V3 Double -- Direction
-               }
-         deriving (Show)
+import Vector
+import Color
+import Scene
 
+type Ray = (Vec3, Vec3) -- Ray origin, direction
 
-data Intersection = Intersection { intersectionPoint :: Point V3 Double -- Point of intersection
-                                 , intersectionNormal :: V3 Double -- Normal at that point
-                                 , tMin :: Double -- Minimal distance from the origin to the current intersection point.
-                                 }
-                  deriving (Show)
-
-
-rayIntersection :: Ray -> Shape -> Maybe Intersection
-
-rayIntersection (Ray {rayOrigin = ro, rayDirection = rd}) (Plane planePoint planeNormal) =
-  undefined
-
-rayIntersection (Ray {rayOrigin = ro, rayDirection = rd}) (Sphere sphereCenter sphereRadius) =
-  undefined
-
-rayIntersection (Ray {rayOrigin = ro, rayDirection = rd}) (Triangle (P v0) (P v1) (P v2) n) =
-  undefined
+rayMarch :: Scene -> Double -> Ray -> Maybe Color -- Takes a scene, the position(checks for reaching out of the scene/no hit,) and the ray.
+rayMarch = undefined
