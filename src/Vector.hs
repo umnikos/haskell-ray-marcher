@@ -3,6 +3,7 @@ module Vector
   , dot
   , scale
   , mag
+  , normalize
   ) where
 
 data Vec3 = Vec3 !Double !Double !Double deriving (Show,Eq)
@@ -25,3 +26,6 @@ squared_mag v3@(Vec3 x y z) = (x * x + y * y + z * z)
 
 mag :: Vec3 -> Double
 mag v = sqrt (squared_mag v)
+
+normalize :: Vec3 -> Vec3
+normalize v = ( 1 / mag v) `scale` v
