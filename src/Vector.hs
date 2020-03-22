@@ -15,7 +15,7 @@ instance Num Vec3 where
     abs (Vec3 x y z) = Vec3 (abs x) (abs y) (abs z)
     (Vec3 x y z) * (Vec3 x1 y1 z1) = Vec3 (x * x1) (y * y1) (z * z1)
     fromInteger x = let y = fromInteger x in Vec3 y y y
-    signum (Vec3 x y z) = signum (x*y*z)
+    signum (Vec3 x y z) = Vec3 (signum x) (signum y) (signum z)
 
 
 -- | The dot product of two vectors
