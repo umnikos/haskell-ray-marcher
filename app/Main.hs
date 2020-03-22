@@ -1,6 +1,8 @@
 module Main where
 
-import Lib
+import Marcher
+
+mysphere = sphere
 
 main :: IO ()
-main = someFunc
+main = putStrLn "Hello!"
