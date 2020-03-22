@@ -4,14 +4,14 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: daa43a11c30d3f7097938e7eb172a0fb810bed1fe59f27f58dfb7ac256a7890d
+-- hash: 589cccfb84629b2ea50984b22a84d1b2ce37e14405e46bb403326d03e5d98867
 
 name:           ray-marcher
 version:        0.1.0.0
 description:    Please see the README on GitHub at <https://github.com/umnikos/haskell-ray-marcher#readme>
 homepage:       https://github.com/umnikos/haskell-ray-marcher#readme
 bug-reports:    https://github.com/umnikos/haskell-ray-marcher/issues
-author:         Alex Stefanov & Alex Videnov
+author:         Alex&Alex
 maintainer:     example@example.com
 license:        GPLv3
 license-file:   LICENSE
