@@ -18,15 +18,20 @@ instance Num Vec3 where
     signum = error "Signum on Vec3 is not implemented" -- TODO
 
 
+-- | The dot product of two vectors
 (Vec3 x y z) `dot` (Vec3 a s d) = x*a + y*s + z*d
+-- | Scale a vector's magnitude by a number.
 a `scale` (Vec3 x y z) = Vec3 (a*x) (a*y) (a*z)
 
+-- | (See 'mag').
 squared_mag :: Vec3 -> Double
 squared_mag v3@(Vec3 x y z) = (x * x + y * y + z * z)
 
+-- | Returns the magnitude (i.e. the length) of a vector.
 mag :: Vec3 -> Double
 mag v = sqrt (squared_mag v)
 
+-- | Scale a vector so that it will have a magnitude of 1
 normalize :: Vec3 -> Vec3
 normalize (Vec3 0 0 0) = error "Cannot normalize a vector with magnitude 0"
 normalize v = ( 1 / mag v) `scale` v
