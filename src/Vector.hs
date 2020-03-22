@@ -28,4 +28,5 @@ mag :: Vec3 -> Double
 mag v = sqrt (squared_mag v)
 
 normalize :: Vec3 -> Vec3
+normalize (Vec3 0 0 0) = error "Cannot normalize a vector with magnitude 0"
 normalize v = ( 1 / mag v) `scale` v
