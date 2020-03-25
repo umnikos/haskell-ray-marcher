@@ -25,15 +25,15 @@ getXComponents :: Int -> [Double]
 getXComponents width = take width [-1, -1 + 2 / fromIntegral width .. ] -- Generates equally spaced floats from -1 to 1.
 
 widthCoords :: ImageSettings -> [Double]
-widthCoords setting = getXComponents $ imageWidth setting -- Width of the image
+widthCoords setting = getXComponents $ getImageWidth setting -- Width of the image
 
 getYComponents :: Int -> [Double]
 getYComponents height = take height [-1, -1 + 2 / fromIntegral height .. ]
 
 heightCoords :: ImageSettings -> [Double]
-heightCoords setting = getYComponents $ imageHeight setting -- Height of the image
+heightCoords setting = getYComponents $ getImageHeight setting -- Height of the image
 
 getRays :: ImageSettings -> [[Ray]]
 getRays setting = map computeRow $ heightCoords setting
-    where   z = (tan (fieldOfView setting / 2))
+    where   z = (tan (getFieldOfView setting / 2))
             computeRow y = [ (Vec3 0 0 0, normalize (Vec3 x (-y) z) ) | x <- widthCoords setting ] -- First Ray has coordinates [-1,-(-1)].

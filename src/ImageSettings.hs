@@ -1,13 +1,10 @@
 module ImageSettings
-  ( ImageSettings
-    , imageWidth
-    , imageHeight
-    , fieldOfView
+  ( ImageSettings (..)
   ) where
 
 
 data ImageSettings = ImageSettings
- { imageWidth :: Int
- , imageHeight :: Int
- , fieldOfView :: Double
+ { getImageWidth :: Int
+ , getImageHeight :: Int
+ , getFieldOfView :: Double
  }
