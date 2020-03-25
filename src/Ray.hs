@@ -6,6 +6,7 @@ module Ray
 import Vector
 import Color
 import Scene
+import ImageSettings
 
 type Ray = (Vec3, Vec3) -- Ray origin, direction
 
@@ -23,16 +24,16 @@ rayMarch s end (pos,dir) -- End is the render distance (how far to march before 
 getXComponents :: Int -> [Double]
 getXComponents width = take width [-1, -1 + 2 / fromIntegral width .. ] -- Generates equally spaced floats from -1 to 1.
 
-widthCoords :: [Double]
-widthCoords = getXComponents 1024 -- Width of the image
+widthCoords :: ImageSettings -> [Double]
+widthCoords setting = getXComponents $ imageWidth setting -- Width of the image
 
 getYComponents :: Int -> [Double]
 getYComponents height = take height [-1, -1 + 2 / fromIntegral height .. ]
 
-heightCoords :: [Double]
-heightCoords = getYComponents 512 -- Height of the image
+heightCoords :: ImageSettings -> [Double]
+heightCoords setting = getYComponents $ imageHeight setting -- Height of the image
 
-getRays :: Double -> [[Ray]]
-getRays fov = map computeRow heightCoords
-    where   z = (tan (fov / 2))
-            computeRow y = [ (Vec3 0 0 0, normalize (Vec3 x (-y) z) ) | x <- widthCoords ] -- First Ray has coordinates [-1,-(-1)].
+getRays :: ImageSettings -> [[Ray]]
+getRays setting = map computeRow $ heightCoords setting
+    where   z = (tan (fieldOfView setting / 2))
+            computeRow y = [ (Vec3 0 0 0, normalize (Vec3 x (-y) z) ) | x <- widthCoords setting ] -- First Ray has coordinates [-1,-(-1)].
