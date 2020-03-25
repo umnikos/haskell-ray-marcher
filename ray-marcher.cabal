@@ -31,6 +31,7 @@ library
       Ray
       Scene
       Vector
+      ImageSettings
   other-modules:
       Paths_ray_marcher
   hs-source-dirs:
