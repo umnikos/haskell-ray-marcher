@@ -18,24 +18,6 @@ $ stack run
 #### Tech:
 * [Haskell](https://www.haskell.org/)
 
-### Necessary libraries:
-
-| Library | Link to hackage |
-| ------ | ------ |
-| Graphics.Image | http://hackage.haskell.org/package/hip-1.5.4.0/docs/Graphics-Image.html |
-| Codec.Image.PPM | http://hackage.haskell.org/package/ppm-2009.5.13/docs/Codec-Image-PPM.html|
-
-### Installation:
- - Graphics.Image
-```sh
-$ cabal install hip
-```
-
- - Codec.Image.PPM
-```sh
-$ cabal install ppm
-```
-
 License
 --
 ##### GNU v3.0
