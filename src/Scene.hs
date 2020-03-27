@@ -5,16 +5,18 @@ module Scene
   , Material
   , sphere
   , mergeScenes
+  , scene
   ) where
 
 import Vector
+import Color
+import Data.List ( foldl' )
 
 type Radius = Double
 type Position = Vec3
 type Scene = Position -> (Radius, Material)
 type Material = (Vec3, Double, Double) -- Color, Specular lighting and Gloss(defines how "soft"/"hard" the reflection is)
 
--- Example sphere
 sphere :: Position -> Radius -> Scene
 sphere pos r = \pt -> (mag (pos-pt) - r, (Vec3 1 1 1, 20, 0.5))
 
@@ -24,3 +26,7 @@ mergeScenes scene1 scene2 pt
     | otherwise = res2
     where   res1@(d1, _) = scene1 pt
             res2@(d2, _) = scene2 pt
+
+-- Example scene
+scene :: Scene
+scene = red $ sphere (Vec3 0 0 (-3)) 1
