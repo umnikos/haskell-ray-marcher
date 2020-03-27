@@ -5,11 +5,9 @@ module Scene
   , Material
   , sphere
   , mergeScenes
-  , scene
   ) where
 
 import Vector
-import Color
 import Data.List ( foldl' )
 
 type Radius = Double
@@ -26,7 +24,3 @@ mergeScenes scene1 scene2 pt
     | otherwise = res2
     where   res1@(d1, _) = scene1 pt
             res2@(d2, _) = scene2 pt
-
--- Example scene
-scene :: Scene
-scene = red $ sphere (Vec3 0 0 (-3)) 1
