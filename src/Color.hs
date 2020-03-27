@@ -15,7 +15,7 @@ colorize c s pt =
   in (d, ( c,p,g )) -- Adding the color to the scene.
 
 -- Example Colors
-red :: (p -> (a1, (a2, b, c))) -> p -> (a1, (Vec3, b, c))
+red, green, blue :: (p -> (a1, (a2, b, c))) -> p -> (a1, (Vec3, b, c))
 red = colorize (Vec3 1 0 0)
 green = colorize (Vec3 0 1 0)
 blue = colorize (Vec3 0 0 1)
