@@ -11,4 +11,27 @@ http://www.nobugs.org/developer/htrace/
 - Scene is created in a separate binary file, which is later read from.
 - The PPM output is converted to the lighter PNG format.
 
+## Setup guide:
 
+### Software requirements:
+- ghc
+- cabal
+
+### Installing needed libraries:
+```sh
+$ cabal install ppm
+$ cabal install hip
+```
+
+### How to build:
+```sh
+$ ghc -O2 htrace.hs
+```
+
+### How to run:
+Edit `scene_creator.hs` beforehand to create your scene. After you have your scene do:
+
+```sh
+$ runghc scene_creator.hs
+$ ./htrace
+```
