@@ -2,7 +2,14 @@ module Main where
 
 import Marcher
 
-mysphere = sphere
+myScene :: Scene
+myScene = scene
+
+setting :: ImageSettings
+setting = ImageSettings 512 512 (pi/2)
 
 main :: IO ()
-main = putStrLn "Hello!"
+main = do
+  let rays = getRays setting
+  let colors = map (map (maybe (0,0,0) clamp . rayMarch myScene 100)) rays -- 2D list of triples(RGB Integer values).
+  writePPM "rayMarch.ppm" colors

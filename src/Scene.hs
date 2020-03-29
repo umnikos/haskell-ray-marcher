@@ -14,7 +14,6 @@ type Position = Vec3
 type Scene = Position -> (Radius, Material)
 type Material = (Vec3, Double, Double) -- Color, Specular lighting and Gloss(defines how "soft"/"hard" the reflection is)
 
--- Example sphere
 sphere :: Position -> Radius -> Scene
 sphere pos r = \pt -> (mag (pos-pt) - r, (Vec3 1 1 1, 20, 0.5))
 

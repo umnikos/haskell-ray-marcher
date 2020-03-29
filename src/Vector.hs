@@ -1,3 +1,5 @@
+{-# LANGUAGE BangPatterns #-}
+
 module Vector
   ( Vec3(..)
   , dot

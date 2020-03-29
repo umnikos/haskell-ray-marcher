@@ -25,6 +25,14 @@ dependencies:
 
 library:
   source-dirs: src
+  exposed-modules:
+  - Color
+  - ExampleScenes
+  - ImageSettings
+  - Marcher
+  - Ray
+  - Scene
+  - Vector
 
 executables:
   ray-marcher-exe:
