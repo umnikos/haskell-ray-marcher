@@ -8,7 +8,6 @@ module Scene
   ) where
 
 import Vector
-import Data.List ( foldl' )
 
 type Radius = Double
 type Position = Vec3

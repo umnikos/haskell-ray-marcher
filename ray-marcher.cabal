@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 0906d6661d2a6095cafc09efeae8e6491973da7e3f3b7312253bfc12eee0206c
+-- hash: f5aae3435336ece3fe0f1c6632930316388e5bdf12d436bdc8115f3b2b2f0378
 
 name:           ray-marcher
 version:        0.1.0.0
