@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: f5aae3435336ece3fe0f1c6632930316388e5bdf12d436bdc8115f3b2b2f0378
+-- hash: f6ecc59bf1b0d7e65178613829857aa7755510b5a320d2650cbdd594815bc734
 
 name:           ray-marcher
 version:        0.1.0.0
@@ -42,7 +42,7 @@ library
     , ppm >=2009.5.13
   default-language: Haskell2010
 
-executable ray-marcher-exe
+executable hmarch
   main-is: Main.hs
   other-modules:
       Paths_ray_marcher
@@ -55,7 +55,7 @@ executable ray-marcher-exe
     , ray-marcher
   default-language: Haskell2010
 
-test-suite ray-marcher-test
+test-suite hmarch-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
