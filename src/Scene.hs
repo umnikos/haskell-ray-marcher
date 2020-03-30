@@ -8,7 +8,6 @@ module Scene
   ) where
 
 import Vector
-import Color
 
 type Radius = Double
 type Position = Vec3 -- ^ A position in 3D space
