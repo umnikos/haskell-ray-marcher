@@ -1,3 +1,6 @@
+{-|
+A ray macher implemented in haskell.
+-}
 module Marcher
   ( module Scene
   , module Vector
