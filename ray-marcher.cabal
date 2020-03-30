@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: f6ecc59bf1b0d7e65178613829857aa7755510b5a320d2650cbdd594815bc734
+-- hash: 8194e2d4f85be807420ee80f4dbfb160259cbab57b070ea231d025d43e4f53ae
 
 name:           ray-marcher
 version:        0.1.0.0
@@ -26,13 +26,7 @@ source-repository head
 
 library
   exposed-modules:
-      Color
-      ExampleScenes
-      ImageSettings
       Marcher
-      Ray
-      Scene
-      Vector
   other-modules:
       Paths_ray_marcher
   hs-source-dirs:
