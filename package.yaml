@@ -35,7 +35,7 @@ library:
   - Vector
 
 executables:
-  ray-marcher-exe:
+  hmarch:
     main:                Main.hs
     source-dirs:         app
     ghc-options:
@@ -46,7 +46,7 @@ executables:
     - ray-marcher
 
 tests:
-  ray-marcher-test:
+  hmarch-test:
     main:                Spec.hs
     source-dirs:         test
     ghc-options:
