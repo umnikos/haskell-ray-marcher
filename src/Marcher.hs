@@ -85,16 +85,15 @@ blue = colorize (Vec3 0 0 1)
 type Ray = (Vec3 -- Ray origin
            ,Vec3) -- Ray direction
 
-epsilon :: Double
-epsilon = 0.0001
-
 -- | Marches a ray through a scene. Returns Nothing if it goes outside the scene.
-rayMarch :: Scene -> Double -> Ray -> Maybe Color
-rayMarch s end (pos,dir) -- End is the render distance (how far to march before giving up)
+rayMarch :: Scene -> ImageSettings -> Ray -> Maybe Color
+rayMarch s sett (pos,dir)
     | end <= 0 = Nothing
-    | dist < 0.0001 = Just $ color -- Returns just the color of the scene, no shading.
-    | otherwise = rayMarch s (end-dist) (pos + dist `scale` dir, dir) -- Each time lowering the distance to the end with the distance we traveled.
+    | dist < epsilon = Just $ color -- Returns just the color of the scene, no shading.
+    | otherwise = rayMarch s sett{getRenderDistance=end-dist} (pos + dist `scale` dir, dir) -- Each time lowering the distance to the end with the distance we traveled.
     where   (dist, (color, _, _)) = s pos
+            end = getRenderDistance sett
+            epsilon = getTolerance sett
 
 -- | Produces an array of rays to later be marched.
 getRays :: ImageSettings -> [[Ray]]
@@ -136,9 +135,11 @@ mergeScenes scene1 scene2 pt
 
 -- | A data type holding all of the rendering settings. This is everything needed to create a rendering, excluding the scene itself.
 data ImageSettings = ImageSettings
- { getImageWidth :: Int
- , getImageHeight :: Int
- , getFieldOfView :: Double
+ { getImageWidth :: Int -- ^ In pixels.
+ , getImageHeight :: Int -- ^ In pixels.
+ , getFieldOfView :: Double -- ^ In radians.
+ , getRenderDistance :: Double -- ^ How far to march before giving up.
+ , getTolerance :: Double -- ^ How close to an object to get before counting the ray as hitting that object.
  }
 
 -- | Clamps a color and formats it for ppm outputting.
