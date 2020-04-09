@@ -2,8 +2,6 @@
 A ray macher implemented in haskell.
 -}
 
-{-# LANGUAGE BangPatterns #-}
-
 module Marcher
   ( Vec3(..)
   , dot
@@ -35,26 +33,26 @@ import Codec.Image.PPM ( ColorArray, ppm_p6 )
 import System.IO ( withBinaryFile, hPutStr, IOMode(WriteMode) )
 
 -- | A collection of 3 doubles.
-data Vec3 = Vec3 !Double !Double !Double deriving (Show,Eq)
+newtype Vec3 = Vec3 (Double, Double, Double) deriving (Show,Eq)
 
 instance Num Vec3 where
-    (Vec3 x y z) + (Vec3 x1 y1 z1) = Vec3 (x + x1) (y + y1) (z + z1)
-    negate (Vec3 x y z) = Vec3 (-x) (-y) (-z)
+    (Vec3 (x, y, z)) + (Vec3 (x1, y1, z1)) = Vec3 ((x + x1), (y + y1), (z + z1))
+    negate (Vec3 (x, y, z)) = Vec3 ((-x), (-y), (-z))
     x - y = x + negate y
-    abs (Vec3 x y z) = Vec3 (abs x) (abs y) (abs z)
-    (Vec3 x y z) * (Vec3 x1 y1 z1) = Vec3 (x * x1) (y * y1) (z * z1)
-    fromInteger x = let y = fromInteger x in Vec3 y y y
-    signum (Vec3 x y z) = Vec3 (signum x) (signum y) (signum z)
+    abs (Vec3 (x, y, z)) = Vec3 ((abs x), (abs y), (abs z))
+    (Vec3 (x, y, z)) * (Vec3 (x1, y1, z1)) = Vec3 ((x * x1), (y * y1), (z * z1))
+    fromInteger x = let y = fromInteger x in Vec3 (y, y, y)
+    signum (Vec3 (x, y, z)) = Vec3 ((signum x), (signum y), (signum z))
 
 
 -- | The dot product of two vectors
-(Vec3 x y z) `dot` (Vec3 a s d) = x*a + y*s + z*d
+(Vec3 (x, y, z)) `dot` (Vec3 (a, s, d)) = x*a + y*s + z*d
 -- | Scale a vector's magnitude by a number.
-a `scale` (Vec3 x y z) = Vec3 (a*x) (a*y) (a*z)
+a `scale` (Vec3 (x, y, z)) = Vec3 ((a*x), (a*y), (a*z))
 
 -- | (See 'mag').
 squared_mag :: Vec3 -> Double
-squared_mag v3@(Vec3 x y z) = (x * x + y * y + z * z)
+squared_mag v3@(Vec3 (x, y, z)) = (x * x + y * y + z * z)
 
 -- | Returns the magnitude (i.e. the length) of a vector.
 mag :: Vec3 -> Double
@@ -62,7 +60,7 @@ mag v = sqrt (squared_mag v)
 
 -- | Scale a vector so that it will have a magnitude of 1
 normalize :: Vec3 -> Vec3
-normalize (Vec3 0 0 0) = error "Cannot normalize a vector with magnitude 0"
+normalize (Vec3 (0, 0, 0)) = error "Cannot normalize a vector with magnitude 0"
 normalize v = ( 1 / mag v) `scale` v
 
 ------------------------------------------------------------
@@ -78,11 +76,11 @@ colorize c s pt =
 
 red, green, blue :: Scene -> Scene
 -- | Colorize red
-red = colorize (Vec3 1 0 0)
+red = colorize (Vec3 (1, 0, 0))
 -- | Colorize green
-green = colorize (Vec3 0 1 0)
+green = colorize (Vec3 (0, 1, 0))
 -- | Colorize blue
-blue = colorize (Vec3 0 0 1)
+blue = colorize (Vec3 (0, 0, 1))
 
 ------------------------------------------------------------
 
@@ -102,7 +100,7 @@ rayMarch s sett (pos,dir)
 
 -- | Produces an array of rays to later be marched.
 getRays :: ImageSettings -> [[Ray]]
-getRays setting = [[ (Vec3 0 0 0, normalize (Vec3 x (-y) z) ) -- First Ray has coordinates [-1,-(-1)].
+getRays setting = [[ (Vec3 (0, 0, 0), normalize (Vec3 (x, (-y), z)) ) -- First Ray has coordinates [-1,-(-1)].
                    | x <- widthCoords setting ]
                    | y <- heightCoords setting ]
     where z = (tan (pi - getFieldOfView setting / 2))
@@ -134,7 +132,7 @@ type Material = (Color
 
 -- | Defines a sphere at a given position and with a given radius.
 sphere :: Position -> Radius -> Scene
-sphere pos r = \pt -> (mag (pos-pt) - r, (Vec3 1 1 1, 20, 0.5))
+sphere pos r = \pt -> (mag (pos-pt) - r, (Vec3 (1, 1, 1), 20, 0.5))
 
 -- | Combines two scenes into a single scene.
 mergeScenes :: Scene -> Scene -> Scene
@@ -159,7 +157,7 @@ data ImageSettings = ImageSettings
 clamp :: (Integral a, Integral b, Integral c)
       => Color
       -> (a, b, c) -- ^ Returns RGB clamped triple
-clamp (Vec3 r g b) = (clampFloat r, clampFloat g, clampFloat b)
+clamp (Vec3 (r, g, b)) = (clampFloat r, clampFloat g, clampFloat b)
     where clampFloat f = max 0 (min 255 (round ( 255 * f )))
 
 -- | Writes a ColorArray to a file.
@@ -174,4 +172,4 @@ writePPM fileName img = do
 
 -- | An example scene.
 scene :: Scene
-scene = red $ sphere (Vec3 0 0 (-3)) 1
+scene = red $ sphere (Vec3 (0, 0, (-3))) 1
