@@ -12,6 +12,7 @@ module Marcher
   , red
   , green
   , blue
+  , black
   , Ray
   , rayRender
   , rayMarch
@@ -27,7 +28,8 @@ module Marcher
   , ImageSettings (..)
   , writePPM
   , clamp
-  , scene
+  , defaultSettings
+  , defaultScene
   ) where
 
 import Codec.Image.PPM ( ColorArray, ppm_p6 )
@@ -75,13 +77,15 @@ colorize c s pt =
   let (d, (_,p,g)) = s pt -- Evaluating the scene
   in (d, ( c,p,g )) -- Adding the color to the scene.
 
-red, green, blue :: Scene -> Scene
--- | Colorize red
-red = colorize (Vec3 (1, 0, 0))
--- | Colorize green
-green = colorize (Vec3 (0, 1, 0))
--- | Colorize blue
-blue = colorize (Vec3 (0, 0, 1))
+red, green, blue :: Color
+-- | RGB FF0000
+red = Vec3 (1,0,0)
+-- | RGB 00FF00
+green = Vec3 (0,1,0)
+-- | RGB 0000FF
+blue = Vec3 (0,0,1)
+-- | RGB 000000
+black = Vec3 (0,0,0)
 
 ------------------------------------------------------------
 
@@ -95,7 +99,7 @@ type Direction = Vec3
 -- | Marches a ray through a scene and then does shading, reflections and refractions.
 rayRender :: ImageSettings -> Scene -> Ray -> Color
 rayRender sett s ray = case marched of
-                            Nothing -> Vec3 (0,0,0)
+                            Nothing -> getBackgroundColor sett
                             Just pos -> getColor $ s pos
   where marched = rayMarch sett s ray
         getColor (_,(color,_,_)) = color
@@ -174,6 +178,7 @@ data ImageSettings = ImageSettings
  , getFieldOfView :: Double -- ^ In radians.
  , getRenderDistance :: Double -- ^ How far to march before giving up.
  , getTolerance :: Double -- ^ How close to an object to get before counting the ray as hitting that object.
+ , getBackgroundColor :: Color -- ^ The background color of a scene.
  }
 
 -- | Clamps a color and formats it for ppm outputting.
@@ -193,6 +198,9 @@ writePPM fileName img = do
 
 ------------------------------------------------------------
 
+-- | Default image settings.
+defaultSettings = ImageSettings 512 512 (pi/2) 100 0.0001 black
+
 -- | An example scene.
-scene :: Scene
-scene = red $ sphere (Vec3 (0, 0, (-3))) 1
+defaultScene :: Scene
+defaultScene = colorize red $ sphere (Vec3 (0, 0, (-3))) 1

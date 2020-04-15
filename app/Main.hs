@@ -3,10 +3,10 @@ module Main where
 import Marcher
 
 myScene :: Scene
-myScene = scene
+myScene = defaultScene
 
 setting :: ImageSettings
-setting = ImageSettings 512 512 (pi/2) 100 0.0001
+setting = defaultSettings
 
 main :: IO ()
 main = do
