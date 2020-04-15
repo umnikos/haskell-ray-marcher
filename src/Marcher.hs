@@ -13,6 +13,7 @@ module Marcher
   , green
   , blue
   , Ray
+  , rayRender
   , rayMarch
   , getRays
   , Radius
@@ -91,11 +92,19 @@ type Ray = (Position
 -- | A direction in 3D space stored as a normalized vector
 type Direction = Vec3
 
--- | Marches a ray through a scene. Returns Nothing if it goes outside the scene.
-rayMarch :: ImageSettings -> Scene -> Ray -> Maybe Color
+-- | Marches a ray through a scene and then does shading, reflections and refractions.
+rayRender :: ImageSettings -> Scene -> Ray -> Color
+rayRender sett s ray = case marched of
+                            Nothing -> Vec3 (0,0,0)
+                            Just pos -> getColor $ s pos
+  where marched = rayMarch sett s ray
+        getColor (_,(color,_,_)) = color
+
+-- | Marches a ray through a scene until it hits an object. Returns Nothing if it goes outside the scene.
+rayMarch :: ImageSettings -> Scene -> Ray -> Maybe Position
 rayMarch sett s (pos,dir)
     | end <= 0 = Nothing
-    | dist < epsilon = Just $ color -- Returns just the color of the scene, no shading.
+    | dist < epsilon = Just pos
     | otherwise = rayMarch sett{getRenderDistance=end-dist} s (pos + dist `scale` dir, dir) -- Each time lowering the distance to the end with the distance we traveled.
     where   (dist, (color, _, _)) = s pos
             end = getRenderDistance sett
