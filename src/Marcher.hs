@@ -86,6 +86,8 @@ green = Vec3 (0,1,0)
 blue = Vec3 (0,0,1)
 -- | RGB 000000
 black = Vec3 (0,0,0)
+-- | RGB 7F7F7F
+gray = Vec3 (0.5,0.5,0.5)
 
 ------------------------------------------------------------
 
@@ -98,11 +100,17 @@ type Direction = Vec3
 
 -- | Marches a ray through a scene and then does shading, reflections and refractions.
 rayRender :: ImageSettings -> Scene -> Ray -> Color
-rayRender sett s ray = case marched of
-                            Nothing -> getBackgroundColor sett
-                            Just pos -> getColor $ s pos
-  where marched = rayMarch sett s ray
-        getColor (_,(color,_,_)) = color
+rayRender sett s ray = case rayMarch sett s ray of
+    Nothing -> getBackgroundColor sett
+    Just pos -> let color = getColor $ s pos
+              in case rayMarch sett newscene (pos + 3*epsilon `scale` calcNormal sett s pos, normalize $ light - pos) of
+        Nothing -> color
+        Just newpos -> if mag (light-newpos) < epsilon then color else gray * color
+
+  where getColor (_,(color,_,_)) = color
+        light = getSunPosition sett
+        newscene = mergeScenes s $ pointToScene light
+        epsilon = getTolerance sett
 
 -- | Marches a ray through a scene until it hits an object. Returns Nothing if it goes outside the scene.
 rayMarch :: ImageSettings -> Scene -> Ray -> Maybe Position
@@ -159,7 +167,7 @@ type Material = (Color
 
 -- | Defines a sphere at a given position and with a given radius.
 sphere :: Position -> Radius -> Scene
-sphere pos r = \pt -> (mag (pos-pt) - r, (Vec3 (1, 1, 1), 20, 0.5))
+sphere pos r = \pt -> (mag (pos-pt) - r, defaultMaterial)
 
 -- | Combines two scenes into a single scene.
 mergeScenes :: Scene -> Scene -> Scene
@@ -168,6 +176,9 @@ mergeScenes scene1 scene2 pt
     | otherwise = res2
     where   res1@(d1, _) = scene1 pt
             res2@(d2, _) = scene2 pt
+
+pointToScene :: Position -> Scene
+pointToScene p j = (mag (p-j), defaultMaterial)
 
 ------------------------------------------------------------
 
@@ -179,6 +190,7 @@ data ImageSettings = ImageSettings
  , getRenderDistance :: Double -- ^ How far to march before giving up.
  , getTolerance :: Double -- ^ How close to an object to get before counting the ray as hitting that object.
  , getBackgroundColor :: Color -- ^ The background color of a scene.
+ , getSunPosition :: Position -- ^ TEMPORARY. The position of the light source.
  }
 
 -- | Clamps a color and formats it for ppm outputting.
@@ -199,8 +211,11 @@ writePPM fileName img = do
 ------------------------------------------------------------
 
 -- | Default image settings.
-defaultSettings = ImageSettings 512 512 (pi/2) 100 0.0001 black
+defaultSettings = ImageSettings 1024 1024 (pi/2) 100 0.00001 black (Vec3 (50,100,30))
 
 -- | An example scene.
 defaultScene :: Scene
 defaultScene = colorize red $ sphere (Vec3 (0, 0, (-3))) 1
+
+-- | Default material when a material is unspecified.
+defaultMaterial = (Vec3 (1, 1, 1), 20, 0.5)
