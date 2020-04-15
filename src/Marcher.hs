@@ -84,19 +84,19 @@ blue = colorize (Vec3 (0, 0, 1))
 
 ------------------------------------------------------------
 
--- | Stores the ray origin as a position in space and a direction as a normalized vector.
-type Ray = (Position -- Ray origin
-           ,Vec3) -- Ray direction
+-- | A pair of a position and a direction in 3D space
+type Ray = (Position
+           ,Direction)
 
--- | A direction in 3D space
+-- | A direction in 3D space stored as a normalized vector
 type Direction = Vec3
 
 -- | Marches a ray through a scene. Returns Nothing if it goes outside the scene.
-rayMarch :: Scene -> ImageSettings -> Ray -> Maybe Color
-rayMarch s sett (pos,dir)
+rayMarch :: ImageSettings -> Scene -> Ray -> Maybe Color
+rayMarch sett s (pos,dir)
     | end <= 0 = Nothing
     | dist < epsilon = Just $ color -- Returns just the color of the scene, no shading.
-    | otherwise = rayMarch s sett{getRenderDistance=end-dist} (pos + dist `scale` dir, dir) -- Each time lowering the distance to the end with the distance we traveled.
+    | otherwise = rayMarch sett{getRenderDistance=end-dist} s (pos + dist `scale` dir, dir) -- Each time lowering the distance to the end with the distance we traveled.
     where   (dist, (color, _, _)) = s pos
             end = getRenderDistance sett
             epsilon = getTolerance sett
