@@ -88,6 +88,9 @@ blue = colorize (Vec3 (0, 0, 1))
 type Ray = (Position -- Ray origin
            ,Vec3) -- Ray direction
 
+-- | A direction in 3D space
+type Direction = Vec3
+
 -- | Marches a ray through a scene. Returns Nothing if it goes outside the scene.
 rayMarch :: Scene -> ImageSettings -> Ray -> Maybe Color
 rayMarch s sett (pos,dir)
@@ -98,6 +101,15 @@ rayMarch s sett (pos,dir)
             end = getRenderDistance sett
             epsilon = getTolerance sett
 
+
+-- | Calculates the surface normals of a given scene.
+calcNormal :: ImageSettings -> Scene -> Position -> Direction
+calcNormal sett s pt = normalize (Vec3 (x, y, z)) -- pt is the current position of our view ray.
+    where   epsilon = getTolerance sett
+            x = fst ( s (pt + Vec3 (epsilon, 0, 0) )) - fst (s (pt - Vec3 (epsilon, 0, 0)) )
+            y = fst ( s (pt + Vec3 (0, epsilon, 0) )) - fst (s (pt - Vec3 (0, epsilon, 0)) )
+            z = fst ( s (pt + Vec3 (0, 0, epsilon) )) - fst (s (pt - Vec3 (0, 0, epsilon)) )
+
 -- | Produces an array of rays to later be marched.
 getRays :: ImageSettings -> [[Ray]]
 getRays setting = [[ (Vec3 (0, 0, 0), normalize (Vec3 (x, (-y), z)) ) -- First Ray has coordinates [-1,-(-1)].
@@ -106,6 +118,8 @@ getRays setting = [[ (Vec3 (0, 0, 0), normalize (Vec3 (x, (-y), z)) ) -- First R
     where z = (tan (pi - getFieldOfView setting / 2))
           widthCoords setting = spacedPoints $ getImageWidth setting
           heightCoords setting = spacedPoints $ getImageHeight setting
+
+
 
 -- | Generates N doubles from -1 to 1, equally spaced.
 spacedPoints :: Int -> [Double]
