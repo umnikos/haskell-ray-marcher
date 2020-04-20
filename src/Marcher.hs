@@ -13,6 +13,8 @@ module Marcher
   , green
   , blue
   , black
+  , white
+  , mixColors
   , Ray
   , rayRender
   , rayMarch
@@ -28,6 +30,7 @@ module Marcher
   , ImageSettings (..)
   , writePPM
   , clamp
+  , colorToRGB
   , defaultSettings
   , defaultScene
   ) where
@@ -77,7 +80,7 @@ colorize c s pt =
   let (d, (_,p,g)) = s pt -- Evaluating the scene
   in (d, ( c,p,g )) -- Adding the color to the scene.
 
-red, green, blue :: Color
+red, green, blue, black, white :: Color
 -- | RGB FF0000
 red = Vec3 (1,0,0)
 -- | RGB 00FF00
@@ -86,8 +89,18 @@ green = Vec3 (0,1,0)
 blue = Vec3 (0,0,1)
 -- | RGB 000000
 black = Vec3 (0,0,0)
+-- | RGB FFFFFF
+white = Vec3 (1,1,1)
 -- | RGB 7F7F7F
 gray = Vec3 (0.5,0.5,0.5)
+
+-- | Mix two colors additively. Useful for making new colors and not for rendering since it doesn't follow the physical light model.
+-- Red + Black   = Dark Red
+-- Red + Green   = Dark Yellow
+-- Red + White   = Pink
+-- Black + White = Gray
+mixColors :: Color -> Color -> Color
+mixColors a b = (a + b) * gray
 
 ------------------------------------------------------------
 
@@ -100,7 +113,7 @@ type Direction = Vec3
 
 -- | Marches a ray through a scene and then does shading, reflections and refractions.
 rayRender :: ImageSettings -> Scene -> Ray -> Color
-rayRender sett s ray = case rayMarch sett s ray of
+rayRender sett s ray = clamp $ case rayMarch sett s ray of
     Nothing -> getBackgroundColor sett
     Just pos -> let color = getColor $ s pos
               in case rayMarch sett newscene (pos + 3*epsilon `scale` calcNormal sett s pos, normalize $ light - pos) of
@@ -193,12 +206,17 @@ data ImageSettings = ImageSettings
  , getSunPosition :: Position -- ^ TEMPORARY. The position of the light source.
  }
 
--- | Clamps a color and formats it for ppm outputting.
-clamp :: (Integral a, Integral b, Integral c)
-      => Color
-      -> (a, b, c) -- ^ Returns RGB clamped triple
-clamp (Vec3 (r, g, b)) = (clampFloat r, clampFloat g, clampFloat b)
-    where clampFloat f = max 0 (min 255 (round ( 255 * f )))
+-- | Clamps a color so that every component is between 0 and 1
+clamp :: Color -> Color
+clamp (Vec3 (r, g, b)) = Vec3 (clampFloat r, clampFloat g, clampFloat b)
+    where clampFloat f = max 0 (min 1 f)
+
+-- | Prepares a color for outputting
+colorToRGB :: (Integral a, Integral b, Integral c)
+           => Color
+           -> (a, b, c) -- ^ Returns RGB clamped triple
+colorToRGB (Vec3 (r,g,b)) = (scaleFloat r, scaleFloat g, scaleFloat b)
+    where scaleFloat f = round ( 255 * f )
 
 -- | Writes a ColorArray to a file.
 writePPM :: FilePath
@@ -215,7 +233,7 @@ defaultSettings = ImageSettings 1024 1024 (pi/2) 100 0.00001 black (Vec3 (50,100
 
 -- | An example scene.
 defaultScene :: Scene
-defaultScene = colorize red $ sphere (Vec3 (0, 0, (-3))) 1
+defaultScene = colorize (Vec3 (0.8398437500,0.6523437500,0.8554687500)) $ sphere (Vec3 (0, 0, (-3))) 1
 
 -- | Default material when a material is unspecified.
-defaultMaterial = (Vec3 (1, 1, 1), 20, 0.5)
+defaultMaterial = (white, 20, 0.5)
