@@ -229,11 +229,13 @@ writePPM fileName img = do
 ------------------------------------------------------------
 
 -- | Default image settings.
-defaultSettings = ImageSettings 1024 1024 (pi/2) 100 0.00001 black (Vec3 (50,100,30))
+defaultSettings = ImageSettings 1024 1024 (pi/2) 100 0.00001 black (Vec3 (10,10,(10-3)))
 
 -- | An example scene.
 defaultScene :: Scene
-defaultScene = colorize (Vec3 (0.8398437500,0.6523437500,0.8554687500)) $ sphere (Vec3 (0, 0, (-3))) 1
+defaultScene = mergeScenes
+                  (colorize red $ sphere (Vec3 (0, 0, (-3))) 1)
+                  (colorize blue $ sphere (Vec3 (1, 1, (-2))) 0.1)
 
 -- | Default material when a material is unspecified.
 defaultMaterial = (white, 20, 0.5)
