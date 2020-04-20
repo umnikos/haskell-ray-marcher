@@ -18,11 +18,11 @@ main = hspec $ do
   describe "Haskell Ray Marcher" $ do
     describe "Function colorize" $ do
       it "makes a scene blue" $ do
-        let (_, (color, _, _)) = colorize blue simpleScene samplePoint
+        let (_, Material color _ _) = colorize blue simpleScene samplePoint
         color `shouldBe` blue
 
       it "makes a scene red" $ do
-        let (_, (color, _, _)) = colorize red simpleScene samplePoint
+        let (_, Material color _ _) = colorize red simpleScene samplePoint
         color `shouldBe` red
 
     describe "Function mixColors" $ do
