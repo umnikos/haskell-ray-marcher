@@ -72,6 +72,9 @@ normalize :: Vec3 -> Vec3
 normalize (Vec3 (0, 0, 0)) = error "Cannot normalize a vector with magnitude 0"
 normalize v = ( 1 / mag v) `scale` v
 
+equalWithinError :: (Num a, Ord a) => a -> a -> a -> Bool
+equalWithinError epsilon a b = abs (a-b) < epsilon
+
 ------------------------------------------------------------
 
 -- | Color is stored in RGB format.
@@ -121,7 +124,7 @@ rayRender sett s ray = clamp $ case rayMarch sett s ray of
     Just pos -> let color = getColor $ s pos
               in case rayMarch sett newscene (pos + 3*epsilon `scale` calcNormal sett s pos, normalize $ light - pos) of
         Nothing -> color
-        Just newpos -> if mag (light-newpos) < epsilon then color else gray * color
+        Just newpos -> if equalWithinError epsilon 0 $ mag (light-newpos) then color else gray * color
 
   where getColor (_,(color,_,_)) = color
         light = getSunPosition sett
@@ -132,7 +135,7 @@ rayRender sett s ray = clamp $ case rayMarch sett s ray of
 rayMarch :: ImageSettings -> Scene -> Ray -> Maybe Position
 rayMarch sett s (pos,dir)
     | end <= 0 = Nothing
-    | dist < epsilon = Just pos
+    | equalWithinError epsilon 0 dist = Just pos
     | otherwise = rayMarch sett{getRenderDistance=end-dist} s (pos + dist `scale` dir, dir) -- Each time lowering the distance to the end with the distance we traveled.
     where   (dist, (color, _, _)) = s pos
             end = getRenderDistance sett
