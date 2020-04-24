@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: beb8651e32141f3f85a70d36960b671ca7116082439ec511a754fb627ed7e96f
+-- hash: 1b4b2fbc2745cab0eaad1e38d9960b272564a382d93548e40a3d38924cf21dad
 
 name:           ray-marcher
 version:        0.1.0.0
@@ -53,7 +53,6 @@ test-suite hmarch-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
-      MarcherSpec.MarcherSpec
       Paths_ray_marcher
   hs-source-dirs:
       test
