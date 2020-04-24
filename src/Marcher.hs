@@ -9,11 +9,13 @@ module Marcher
   , mag
   , normalize
   , Color
+  , colorize
   , red
   , green
   , blue
   , black
   , white
+  , gray
   , mixColors
   , Ray
   , rayRender
@@ -26,6 +28,7 @@ module Marcher
   , Gloss
   , Material
   , sphere
+  , spacedPoints
   , mergeScenes
   , ImageSettings (..)
   , writePPM
