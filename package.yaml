@@ -41,8 +41,8 @@ executables:
 
 tests:
   hmarch-test:
-    main:                Spec.hs
-    source-dirs:         test
+    spec:
+    defaults: hspec/hspec@master
     ghc-options:
     - -threaded
     - -rtsopts
