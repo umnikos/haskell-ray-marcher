@@ -24,9 +24,7 @@ module Marcher
   , Radius
   , Position
   , Scene
-  , SpecularLighting
-  , Gloss
-  , Material
+  , Material (..)
   , sphere
   , spacedPoints
   , mergeScenes
@@ -36,6 +34,7 @@ module Marcher
   , colorToRGB
   , defaultSettings
   , defaultScene
+  , equalWithinError
   ) where
 
 import Codec.Image.PPM ( ColorArray, ppm_p6 )
@@ -72,6 +71,9 @@ normalize :: Vec3 -> Vec3
 normalize (Vec3 (0, 0, 0)) = error "Cannot normalize a vector with magnitude 0"
 normalize v = ( 1 / mag v) `scale` v
 
+equalWithinError :: (Num a, Ord a) => a -> a -> a -> Bool
+equalWithinError epsilon a b = abs (a-b) < epsilon
+
 ------------------------------------------------------------
 
 -- | Color is stored in RGB format.
@@ -80,8 +82,8 @@ type Color = Vec3
 -- | Sets the color of an entire scene to some color.
 colorize :: Color -> Scene -> Scene
 colorize c s pt =
-  let (d, (_,p,g)) = s pt -- Evaluating the scene
-  in (d, ( c,p,g )) -- Adding the color to the scene.
+  let (d, Material _ p g) = s pt -- Evaluating the scene
+  in (d, Material c p g) -- Adding the color to the scene.
 
 red, green, blue, black, white :: Color
 -- | RGB FF0000
@@ -118,13 +120,12 @@ type Direction = Vec3
 rayRender :: ImageSettings -> Scene -> Ray -> Color
 rayRender sett s ray = clamp $ case rayMarch sett s ray of
     Nothing -> getBackgroundColor sett
-    Just pos -> let color = getColor $ s pos
+    Just pos -> let color = getColor $ snd $ s pos
               in case rayMarch sett newscene (pos + 3*epsilon `scale` calcNormal sett s pos, normalize $ light - pos) of
         Nothing -> color
-        Just newpos -> if mag (light-newpos) < epsilon then color else gray * color
+        Just newpos -> if equalWithinError epsilon 0 $ mag (light-newpos) then color else gray * color
 
-  where getColor (_,(color,_,_)) = color
-        light = getSunPosition sett
+  where light = getSunPosition sett
         newscene = mergeScenes s $ pointToScene light
         epsilon = getTolerance sett
 
@@ -132,9 +133,9 @@ rayRender sett s ray = clamp $ case rayMarch sett s ray of
 rayMarch :: ImageSettings -> Scene -> Ray -> Maybe Position
 rayMarch sett s (pos,dir)
     | end <= 0 = Nothing
-    | dist < epsilon = Just pos
+    | equalWithinError epsilon 0 dist = Just pos
     | otherwise = rayMarch sett{getRenderDistance=end-dist} s (pos + dist `scale` dir, dir) -- Each time lowering the distance to the end with the distance we traveled.
-    where   (dist, (color, _, _)) = s pos
+    where   (dist, Material color _ _) = s pos
             end = getRenderDistance sett
             epsilon = getTolerance sett
 
@@ -172,14 +173,12 @@ type Radius = Double
 type Position = Vec3
 -- | One or several objects in space.
 type Scene = Position -> (Radius, Material)
--- | Specular lighting is the bright spot on shiny objects.
-type SpecularLighting = Double
--- | Defines how "soft"/"hard" the reflection is.
-type Gloss = Double
 -- | All properties describing an object other than its shape.
-type Material = (Color
-                ,SpecularLighting
-                ,Gloss)
+data Material = Material
+  { getColor :: Color
+  , getSpecularLighting :: Double -- ^ Specular lighting is the bright spot on shiny objects.
+  , getGloss :: Double -- ^ Gloss defines how "soft"/"hard" the reflection is.
+  } deriving (Show, Eq)
 
 -- | Defines a sphere at a given position and with a given radius.
 sphere :: Position -> Radius -> Scene
@@ -241,4 +240,4 @@ defaultScene = mergeScenes
                   (colorize blue $ sphere (Vec3 (1, 1, (-2))) 0.1)
 
 -- | Default material when a material is unspecified.
-defaultMaterial = (white, 20, 0.5)
+defaultMaterial = Material white 20 0.5

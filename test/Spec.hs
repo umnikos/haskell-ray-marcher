@@ -1,6 +1,29 @@
 import Test.Hspec
 
 import Marcher
+import Control.Monad
+
+class MyEq a where
+  (~=) :: a -> a -> Expectation
+
+epsilon :: Double
+epsilon = 0.001
+
+instance MyEq Vec3 where
+    (Vec3 (x, y, z)) ~= (Vec3 (x1, y1, z1)) =
+      unless (equalWithinError epsilon x x1 && equalWithinError epsilon y y1 && equalWithinError epsilon z z1 ) .
+        expectationFailure $ "expected: " ++ show (Vec3 (x, y, z)) ++ "\n but got: " ++ show (Vec3 (x1, y1, z1))
+
+instance ((Show a), (Ord a), (Num a), (Fractional a)) => MyEq [a] where
+  xs ~= ys =
+    unless (testForLists 0.001 xs ys) .
+      expectationFailure $ "expected:" ++ show (xs) ++ "\n but got: " ++ show (ys)
+    where testForLists = \eps xs ys -> foldr (&&) True $ zipWith (\x y -> equalWithinError eps x y) xs ys :: Bool
+
+instance MyEq Double where
+  x ~= y =
+    unless (equalWithinError epsilon x y) .
+      expectationFailure $ "expected:" ++ show (x) ++ "\n but got: " ++ show (y)
 
 samplePoint :: Position
 samplePoint = Vec3 (0,0,0) -- Origin
@@ -18,16 +41,16 @@ main = hspec $ do
   describe "Haskell Ray Marcher" $ do
     describe "Function colorize" $ do
       it "makes a scene blue" $ do
-        let (_, (color, _, _)) = colorize blue simpleScene samplePoint
-        color `shouldBe` blue
+        let (_, Material color _ _) = colorize blue simpleScene samplePoint
+        color ~= blue
 
       it "makes a scene red" $ do
-        let (_, (color, _, _)) = colorize red simpleScene samplePoint
-        color `shouldBe` red
+        let (_, Material color _ _) = colorize red simpleScene samplePoint
+        color ~= red
 
     describe "Function mixColors" $ do
       it "mixes two colors additively" $ do
-        mixColors black white `shouldBe` gray -- black and white makes grey
+        mixColors black white ~= gray -- black and white makes grey
 
     describe "Function colorToRGB" $ do
       it "prepares a color for output, making it in the range 0 - 255" $ do
@@ -36,23 +59,23 @@ main = hspec $ do
     describe "Function spacedPoints" $ do
       it " Generates N doubles from -1 to 1, equally spaced" $ do
         let points = [-1.0,-0.5,0.0,0.5,1.0]
-        spacedPoints 5 `shouldBe` points
+        spacedPoints 5 ~= points
 
     describe "Scene, consisting of one sphere" $ do
       it "Returns the closest distance to a sphere" $ do
         let mySphere = sphere (Vec3 (0, 0, (-3))) 1
             myPosition = samplePoint
             (dist, _) = mySphere myPosition
-        dist `shouldBe` 2 -- Z is -3, so if the radius is 1, that means the left distance to the origin is 2
+        dist ~= 2 -- Z is -3, so if the radius is 1, that means the left distance to the origin is 2
 
     describe "Function rayRender (complete rendering of a given point)" $ do
       it "Renders a point on the surface of a red sphere" $ do
         let ray = (Vec3(0, 0, 0), Vec3(0, 0, -1)) -- Red sphere in on (Vec3 (0, 0, (-3))
-        rayRender defaultSettings complexScene ray `shouldBe` red
+        rayRender defaultSettings complexScene ray ~= red
 
       it "Casts a shadow on the surface of a red sphere" $ do
         let ray = (Vec3(0, 0, 0), Vec3(-0.2, -0.2, -1)) -- This is inside the shadow, given the sun position
-        rayRender defaultSettings complexScene ray `shouldBe` gray * red
+        rayRender defaultSettings complexScene ray ~= (gray * red)
 
     describe "Function mergeScenes" $ do
       it "returns the closest scene from our view" $ do
