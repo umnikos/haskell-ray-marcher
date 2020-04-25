@@ -34,6 +34,7 @@ module Marcher
   , colorToRGB
   , defaultSettings
   , defaultScene
+  , equalWithinError
   ) where
 
 import Codec.Image.PPM ( ColorArray, ppm_p6 )
