@@ -16,6 +16,9 @@ module Marcher
   , black
   , white
   , gray
+  , darkRed
+  , darkYellow
+  , pink
   , mixColors
   , Ray
   , rayRender
@@ -98,6 +101,15 @@ black = Vec3 (0,0,0)
 white = Vec3 (1,1,1)
 -- | RGB 7F7F7F
 gray = Vec3 (0.5,0.5,0.5)
+
+darkRed, darkYellow, pink :: Color
+-- | RGB #800000
+darkRed = Vec3 (0.5,0,0)
+-- | RGB #808000
+darkYellow = Vec3 (0.5,0.5,0)
+-- | RGB #FF8080
+pink = Vec3 (1,0.5,0.5)
+
 
 -- | Mix two colors additively. Useful for making new colors and not for rendering since it doesn't follow the physical light model.
 -- Red + Black   = Dark Red

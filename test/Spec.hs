@@ -25,6 +25,7 @@ instance MyEq Double where
     unless (equalWithinError epsilon x y) .
       expectationFailure $ "expected:" ++ show (x) ++ "\n but got: " ++ show (y)
 
+
 samplePoint :: Position
 samplePoint = Vec3 (0,0,0) -- Origin
 
@@ -49,8 +50,17 @@ main = hspec $ do
         color ~= red
 
     describe "Function mixColors" $ do
-      it "mixes two colors additively" $ do
-        mixColors black white ~= gray -- black and white makes grey
+      it "mixes black and white" $ do
+        mixColors black white ~= gray 
+
+      it "mixes red and black" $ do
+        mixColors red black ~= darkRed
+
+      it "mixes red and green" $ do
+        mixColors red green ~= darkYellow
+
+      it "mixes red and white" $ do
+        mixColors red white ~= pink
 
     describe "Function colorToRGB" $ do
       it "prepares a color for output, making it in the range 0 - 255" $ do
@@ -69,13 +79,21 @@ main = hspec $ do
         dist ~= 2 -- Z is -3, so if the radius is 1, that means the left distance to the origin is 2
 
     describe "Function rayRender (complete rendering of a given point)" $ do
-      it "Renders a point on the surface of a red sphere" $ do
+      it "Renders a point on the surface of a big red sphere" $ do
         let ray = (Vec3(0, 0, 0), Vec3(0, 0, -1)) -- Red sphere in on (Vec3 (0, 0, (-3))
         rayRender defaultSettings complexScene ray ~= red
 
-      it "Casts a shadow on the surface of a red sphere" $ do
+      it "Casts a shadow on the surface of a big red sphere" $ do
         let ray = (Vec3(0, 0, 0), Vec3(-0.2, -0.2, -1)) -- This is inside the shadow, given the sun position
         rayRender defaultSettings complexScene ray ~= (gray * red)
+
+      it "Renders a point on the surface of a small blue sphere" $ do
+        let ray = (Vec3(0,0,0), Vec3(0.5,0.5, -1))
+        rayRender defaultSettings complexScene ray ~= blue
+
+      it "Casts a shadow on the surface of a small blue sphere" $ do
+        let ray = (Vec3(0,0,0), Vec3(0.49,0.49, -1))
+        rayRender defaultSettings defaultScene ray ~= (gray * blue)
 
     describe "Function mergeScenes" $ do
       it "returns the closest scene from our view" $ do
