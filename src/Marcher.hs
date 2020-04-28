@@ -28,6 +28,7 @@ module Marcher
   , sphere
   , spacedPoints
   , mergeScenes
+  , moveScene
   , ImageSettings (..)
   , writePPM
   , clamp
@@ -195,6 +196,10 @@ mergeScenes scene1 scene2 pt
 pointToScene :: Position -> Scene
 pointToScene p j = (mag (p-j), defaultMaterial)
 
+-- | Moves a scene in space by a given amount and direction (a vector)
+moveScene :: Vec3 -> Scene -> Scene
+moveScene vec scene = \point -> scene (point-vec)
+
 ------------------------------------------------------------
 
 -- | A data type holding all of the rendering settings. This is everything needed to create a rendering, excluding the scene itself.
@@ -233,7 +238,7 @@ writePPM fileName img = do
 -- | Default image settings.
 defaultSettings = ImageSettings 1024 1024 (pi/2) 100 0.00001 black (Vec3 (10,10,(10-3)))
 
--- | An example scene.
+-- | An example scene. May change over time, so don't use as anything other than a placeholder.
 defaultScene :: Scene
 defaultScene = mergeScenes
                   (colorize red $ sphere (Vec3 (0, 0, (-3))) 1)
