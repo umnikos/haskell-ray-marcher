@@ -236,6 +236,16 @@ rotateZ angle scene = \(Vec3 (px,py,pz)) ->
       y = py*cos angle - px*sin angle -- sin(a-b) = sina*cosb - cosa*sinb
       in scene (Vec3 (x,y,pz))
 
+-- | A mirror plane on the YZ axis. Does not preserve shadows, only shape and material.
+mirrorX :: Scene -> Scene
+mirrorX scene = \(Vec3 (x,y,z)) -> scene (Vec3 (abs x,y,z))
+-- | A mirror plane on the XZ axis. Does not preserve shadows, only shape and material.
+mirrorY :: Scene -> Scene
+mirrorY scene = \(Vec3 (x,y,z)) -> scene (Vec3 (x,abs y,z))
+-- | A mirror plane on the XY axis. Does not preserve shadows, only shape and material.
+mirrorZ :: Scene -> Scene
+mirrorX scene = \(Vec3 (x,y,z)) -> scene (Vec3 (x,y,abs z))
+
 pointToScene :: Position -> Scene
 pointToScene p j = (mag (p-j), defaultMaterial)
 
