@@ -244,7 +244,7 @@ mirrorY :: Scene -> Scene
 mirrorY scene = \(Vec3 (x,y,z)) -> scene (Vec3 (x,abs y,z))
 -- | A mirror plane on the XY axis. Does not preserve shadows, only shape and material.
 mirrorZ :: Scene -> Scene
-mirrorX scene = \(Vec3 (x,y,z)) -> scene (Vec3 (x,y,abs z))
+mirrorZ scene = \(Vec3 (x,y,z)) -> scene (Vec3 (x,y,abs z))
 
 pointToScene :: Position -> Scene
 pointToScene p j = (mag (p-j), defaultMaterial)
