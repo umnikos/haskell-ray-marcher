@@ -27,6 +27,7 @@ library:
   source-dirs: src
   exposed-modules:
   - Marcher
+  - Marcher.Scenes
 
 executables:
   hmarch:

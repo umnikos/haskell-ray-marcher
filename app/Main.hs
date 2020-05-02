@@ -1,9 +1,10 @@
 module Main where
 
 import Marcher
+import Marcher.Scenes
 
 myScene :: Scene
-myScene = defaultScene
+myScene = cubeDemo
 
 setting :: ImageSettings
 setting = defaultSettings
