@@ -26,8 +26,14 @@ module Marcher
   , Scene
   , Material (..)
   , sphere
+  , cube
   , spacedPoints
   , mergeScenes
+  , sceneOr
+  , sceneAnd
+  , rotateX
+  , rotateY
+  , rotateZ
   , moveScene
   , ImageSettings (..)
   , writePPM
@@ -185,13 +191,50 @@ data Material = Material
 sphere :: Position -> Radius -> Scene
 sphere pos r = \pt -> (mag (pos-pt) - r, defaultMaterial)
 
--- | Combines two scenes into a single scene.
+-- | Defines a cube at a given center position and with a given radius (radius being half of the sidelength)
+cube :: Position -> Radius -> Scene
+cube pos r = moveScene pos
+           $ \(Vec3 (px,py,pz)) -> (mag $ Vec3 (f px, f py, f pz), defaultMaterial)
+  where f x = max 0 (abs x - r)
+
+-- | Combines two scenes into a single scene. Equivalent to 'sceneOr'
 mergeScenes :: Scene -> Scene -> Scene
-mergeScenes scene1 scene2 pt
+mergeScenes = sceneOr
+
+-- | Takes the minimum of the two distance estimators. This way both scenes' objects will appear in the output.
+sceneOr :: Scene -> Scene -> Scene
+sceneOr scene1 scene2 pt
     | d1 < d2 = res1 -- Picks the minimum distance and the corresponding Material
     | otherwise = res2
     where   res1@(d1, _) = scene1 pt
             res2@(d2, _) = scene2 pt
+
+-- | Takes the maximum of the two distance estimators. Only the intersections between the two scenes will appear in the output.
+sceneAnd :: Scene -> Scene -> Scene
+sceneAnd scene1 scene2 pt
+    | d1 > d2 = res1 -- Picks the maximum distance and the corresponding Material
+    | otherwise = res2
+    where   res1@(d1, _) = scene1 pt
+            res2@(d2, _) = scene2 pt
+
+-- | Rotates a scene from the perspective of the X axis. The X component will remain constant.
+rotateX :: Double -> Scene -> Scene
+rotateX angle scene = \(Vec3 (px,py,pz)) ->
+  let y = py*cos angle + pz*sin angle -- cos(a-b) = cosa*cosb + sina*sinb
+      z = pz*cos angle - py*sin angle -- sin(a-b) = sina*cosb - cosa*sinb
+      in scene (Vec3 (px,y,z))
+-- | Rotates a scene from the perspective of the Y axis. The Y component will remain constant.
+rotateY :: Double -> Scene -> Scene
+rotateY angle scene = \(Vec3 (px,py,pz)) ->
+  let z = pz*cos angle + px*sin angle -- cos(a-b) = cosa*cosb + sina*sinb
+      x = px*cos angle - pz*sin angle -- sin(a-b) = sina*cosb - cosa*sinb
+      in scene (Vec3 (x,py,z))
+-- | Rotates a scene from the perspective of the Z axis. The Z component will remain constant.
+rotateZ :: Double -> Scene -> Scene
+rotateZ angle scene = \(Vec3 (px,py,pz)) ->
+  let x = px*cos angle + py*sin angle -- cos(a-b) = cosa*cosb + sina*sinb
+      y = py*cos angle - px*sin angle -- sin(a-b) = sina*cosb - cosa*sinb
+      in scene (Vec3 (x,y,pz))
 
 pointToScene :: Position -> Scene
 pointToScene p j = (mag (p-j), defaultMaterial)

@@ -4,7 +4,7 @@ import Marcher
 import Marcher.Scenes
 
 myScene :: Scene
-myScene = infiniteSpheresDemo
+myScene = cubeDemo
 
 setting :: ImageSettings
 setting = defaultSettings
