@@ -139,24 +139,37 @@ type Direction = Vec3
 rayRender :: ImageSettings -> Scene -> Ray -> Color
 rayRender sett s ray = clamp $ case rayMarch sett s ray of
     Nothing -> getBackgroundColor sett
-    Just pos -> let color = getColor $ snd $ s pos
-              in case rayMarch sett newscene (pos + 3*epsilon `scale` calcNormal sett s pos, normalize $ light - pos) of
-        Nothing -> color
-        Just newpos -> if equalWithinError epsilon 0 $ mag (light-newpos) then color else gray * color
-
-  where light = getSunPosition sett
-        newscene = mergeScenes s $ pointToScene light
-        epsilon = getTolerance sett
+    Just color -> color
 
 -- | Marches a ray through a scene until it hits an object. Returns Nothing if it goes outside the scene.
-rayMarch :: ImageSettings -> Scene -> Ray -> Maybe Position
+rayMarch :: ImageSettings -> Scene -> Ray -> Maybe Color
 rayMarch sett s (pos,dir)
     | end <= 0 = Nothing
-    | equalWithinError epsilon 0 dist = Just pos
+    | equalWithinError epsilon 0 dist = Just $ shade sett s material dir normal pos light
     | otherwise = rayMarch sett{getRenderDistance=end-dist} s (pos + dist `scale` dir, dir) -- Each time lowering the distance to the end with the distance we traveled.
-    where   (dist, Material color _ _) = s pos
+    where   (dist, material) = s pos
             end = getRenderDistance sett
             epsilon = getTolerance sett
+            normal = calcNormal sett s pos
+            light = getLight sett
+
+
+shade :: ImageSettings -> Scene -> Material -> Direction -> Direction -> Position -> Light -> Color -- (materialColor, specPower, gloss
+shade sett s material eye normal pt (color, pos)
+    = (lambert*shadow) `scale` combinedColor
+    where   materialColor = getColor material
+            specPower = getSpecularLighting material
+            gloss = getGloss material
+            lightDir = pos-pt
+            lightDirN = normalize lightDir
+            lambert = max 0 (normal `dot` lightDirN ) -- TODO handle '-' cases of the dot product
+            combinedColor = color * materialColor + spec
+            r = (normal `dot` eye) `scale` eye - normal
+            spec = (gloss * (max 0 (r `dot` lightDirN))**specPower) `scale` color -- TODO same ^^
+            shadow  | lambert == 0 = 0
+                    | otherwise = case rayMarch sett{getRenderDistance=mag lightDir} s (pt + 0.0001 `scale` normal, lightDirN) of
+                                    Nothing -> 1.0
+                                    Just _ -> 0.4
 
 
 -- | Calculates the surface normals of a given scene.
@@ -177,7 +190,6 @@ getRays setting = [[ (Vec3 (0, 0, 0), normalize (Vec3 (x, (-y), z)) ) -- First R
           heightCoords setting = spacedPoints $ getImageHeight setting
 
 
-
 -- | Generates N doubles from -1 to 1, equally spaced.
 spacedPoints :: Int -> [Double]
 spacedPoints n = f <$> fromIntegral <$> [0..n-1]
@@ -193,6 +205,8 @@ type Position = Vec3
 -- | One or several objects in space.
 type Scene = Position -> (Radius, Material)
 -- | All properties describing an object other than its shape.
+type Light = (Color, Position)
+-- | Light is defined by a pure color and position
 data Material = Material
   { getColor :: Color
   , getSpecularLighting :: Double -- ^ Specular lighting is the bright spot on shiny objects.
@@ -275,7 +289,7 @@ data ImageSettings = ImageSettings
  , getRenderDistance :: Double -- ^ How far to march before giving up.
  , getTolerance :: Double -- ^ How close to an object to get before counting the ray as hitting that object.
  , getBackgroundColor :: Color -- ^ The background color of a scene.
- , getSunPosition :: Position -- ^ TEMPORARY. The position of the light source.
+ , getLight :: Light -- ^ TEMPORARY. The position of the light source.
  }
 
 -- | Clamps a color so that every component is between 0 and 1
@@ -301,7 +315,7 @@ writePPM fileName img = do
 ------------------------------------------------------------
 
 -- | Default image settings.
-defaultSettings = ImageSettings 1024 1024 (pi/2) 100 0.00001 black (Vec3 (10,10,(10-3)))
+defaultSettings = ImageSettings 1024 1024 (pi/2) 100 0.00001 black (white, (Vec3 (10,10,(10-3))))
 
 -- | An example scene. May change over time, so don't use as anything other than a placeholder.
 defaultScene :: Scene
