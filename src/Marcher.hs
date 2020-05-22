@@ -315,7 +315,7 @@ writePPM fileName img = do
 ------------------------------------------------------------
 
 -- | Default image settings.
-defaultSettings = ImageSettings 1024 1024 (pi/2) 100 0.00001 black (white, (Vec3 (10,10,(10-3))))
+defaultSettings = ImageSettings 1280 720 (pi/2) 100 0.00001 black (white, (Vec3 (10,10,(10-3))))
 
 -- | An example scene. May change over time, so don't use as anything other than a placeholder.
 defaultScene :: Scene
