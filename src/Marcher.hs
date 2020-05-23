@@ -137,21 +137,24 @@ type Direction = Vec3
 
 -- | Marches a ray through a scene and then does shading, reflections and refractions.
 rayRender :: ImageSettings -> Scene -> Ray -> Color
-rayRender sett s ray = clamp $ case rayMarch sett s ray of
+rayRender sett s ray@(_, dir) = clamp $ case rayMarch sett s ray of
     Nothing -> getBackgroundColor sett
-    Just color -> color
+    Just pos -> let (dist, material) = s pos
+                    end = getRenderDistance sett
+                    epsilon = getTolerance sett
+                    normal = calcNormal sett s pos
+                    light = getLight sett
+                in shade sett s material dir normal pos light
 
 -- | Marches a ray through a scene until it hits an object. Returns Nothing if it goes outside the scene.
-rayMarch :: ImageSettings -> Scene -> Ray -> Maybe Color
+rayMarch :: ImageSettings -> Scene -> Ray -> Maybe Position
 rayMarch sett s (pos,dir)
     | end <= 0 = Nothing
-    | equalWithinError epsilon 0 dist = Just $ shade sett s material dir normal pos light
+    | equalWithinError epsilon 0 dist = Just $ pos
     | otherwise = rayMarch sett{getRenderDistance=end-dist} s (pos + dist `scale` dir, dir) -- Each time lowering the distance to the end with the distance we traveled.
     where   (dist, material) = s pos
             end = getRenderDistance sett
             epsilon = getTolerance sett
-            normal = calcNormal sett s pos
-            light = getLight sett
 
 
 shade :: ImageSettings -> Scene -> Material -> Direction -> Direction -> Position -> Light -> Color -- (materialColor, specPower, gloss
@@ -315,7 +318,7 @@ writePPM fileName img = do
 ------------------------------------------------------------
 
 -- | Default image settings.
-defaultSettings = ImageSettings 1280 720 (pi/2) 100 0.00001 black (white, (Vec3 (10,10,(10-3))))
+defaultSettings = ImageSettings 1280 1280 (pi/2) 100 0.00001 black (white, (Vec3 (10,10,(10-3))))
 
 -- | An example scene. May change over time, so don't use as anything other than a placeholder.
 defaultScene :: Scene
