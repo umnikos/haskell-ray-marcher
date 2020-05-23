@@ -140,8 +140,6 @@ rayRender :: ImageSettings -> Scene -> Ray -> Color
 rayRender sett s ray@(_, dir) = clamp $ case rayMarch sett s ray of
     Nothing -> getBackgroundColor sett
     Just pos -> let (dist, material) = s pos
-                    end = getRenderDistance sett
-                    epsilon = getTolerance sett
                     normal = calcNormal sett s pos
                     light = getLight sett
                 in shade sett s material dir normal pos light
