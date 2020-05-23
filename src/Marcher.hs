@@ -169,8 +169,9 @@ shade sett s material eye normal pt (color, pos)
             r = reflect normal lightDir
             specular = max 0 (glossPower * (max 0 $ r `dot` eye)**specPower) `scale` color
             -- neither of which apply in shadow
+            epsilon = getTolerance sett
             shadow  | lambert == 0 = 0
-                    | otherwise = case rayMarch sett{getRenderDistance=mag (pos-pt)} s (pt + 0.0001 `scale` normal, lightDir) of
+                    | otherwise = case rayMarch sett{getRenderDistance=mag (pos-pt)} s (pt + (3*epsilon) `scale` normal, lightDir) of
                                     Nothing -> 1.0
                                     Just _ -> 0.4
 
