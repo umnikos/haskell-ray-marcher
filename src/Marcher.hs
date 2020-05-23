@@ -157,22 +157,30 @@ rayMarch sett s (pos,dir)
             epsilon = getTolerance sett
 
 
-shade :: ImageSettings -> Scene -> Material -> Direction -> Direction -> Position -> Light -> Color -- (materialColor, specPower, gloss
+shade :: ImageSettings -> Scene -> Material -> Direction -> Direction -> Position -> Light -> Color -- (materialColor, specPower, glossPower)
 shade sett s material eye normal pt (color, pos)
-    = (lambert*shadow) `scale` combinedColor
-    where   materialColor = getColor material
-            specPower = getSpecularLighting material
-            gloss = getGloss material
-            lightDir = pos-pt
-            lightDirN = normalize lightDir
-            lambert = max 0 (normal `dot` lightDirN ) -- TODO handle '-' cases of the dot product
-            combinedColor = color * materialColor + spec
-            r = (normal `dot` eye) `scale` eye - normal
-            spec = (gloss * (max 0 (r `dot` lightDirN))**specPower) `scale` color -- TODO same ^^
+    = clamp $ shadow `scale` (diffused + specular)
+    where   materialColor = getColor material -- intrinsic color
+            specPower = getSpecularLighting material -- specular property
+            glossPower = getGloss material -- gloss property
+            lightDir = normalize $ pos-pt -- direction to the light source
+            -- diffused stuff
+            lambert = max 0 (normal `dot` lightDir )
+            diffused = lambert `scale` (color*materialColor)
+            -- specular stuff
+            r = reflect normal lightDir
+            specular = max 0 (glossPower * (max 0 $ r `dot` eye)**specPower) `scale` color
+            -- neither of which apply in shadow
             shadow  | lambert == 0 = 0
-                    | otherwise = case rayMarch sett{getRenderDistance=mag lightDir} s (pt + 0.0001 `scale` normal, lightDirN) of
+                    | otherwise = case rayMarch sett{getRenderDistance=mag (pos-pt)} s (pt + 0.0001 `scale` normal, lightDir) of
                                     Nothing -> 1.0
                                     Just _ -> 0.4
+
+-- | Reflect a vector off of a surface
+reflect :: Vec3 -- ^ The surface normal, normalized
+        -> Vec3 -- ^ Vector to be reflected
+        -> Vec3 -- ^ Reflection of that vector
+reflect n d = d - scale (2 * dot d n) n
 
 
 -- | Calculates the surface normals of a given scene.
