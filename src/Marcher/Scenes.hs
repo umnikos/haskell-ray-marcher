@@ -5,6 +5,7 @@ module Marcher.Scenes
   ( shadowsDemo
   , infiniteSpheresDemo
   , cubeDemo
+  , shapeDemo
   ) where
 
 import Marcher
