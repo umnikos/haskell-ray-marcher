@@ -53,20 +53,23 @@ import System.IO ( withBinaryFile, hPutStr, IOMode(WriteMode) )
 -- | A collection of 3 doubles.
 newtype Vec3 = Vec3 (Double, Double, Double) deriving (Show,Eq)
 
+mapVec :: (Double -> Double) -> Vec3 -> Vec3
+mapVec f (Vec3 (a,b,c)) = Vec3 (f a,f b,f c)
+
 instance Num Vec3 where
     (Vec3 (x, y, z)) + (Vec3 (x1, y1, z1)) = Vec3 ((x + x1), (y + y1), (z + z1))
-    negate (Vec3 (x, y, z)) = Vec3 ((-x), (-y), (-z))
+    negate = mapVec negate
     x - y = x + negate y
-    abs (Vec3 (x, y, z)) = Vec3 ((abs x), (abs y), (abs z))
+    abs = mapVec abs
     (Vec3 (x, y, z)) * (Vec3 (x1, y1, z1)) = Vec3 ((x * x1), (y * y1), (z * z1))
     fromInteger x = let y = fromInteger x in Vec3 (y, y, y)
-    signum (Vec3 (x, y, z)) = Vec3 ((signum x), (signum y), (signum z))
+    signum = mapVec signum
 
 
 -- | The dot product of two vectors
-(Vec3 (x, y, z)) `dot` (Vec3 (a, s, d)) = x*a + y*s + z*d
+x `dot` y = x * y
 -- | Scale a vector's magnitude by a number.
-a `scale` (Vec3 (x, y, z)) = Vec3 ((a*x), (a*y), (a*z))
+a `scale` v = mapVec (*a) v
 
 -- | (See 'mag').
 squared_mag :: Vec3 -> Double
@@ -230,7 +233,7 @@ sphere pos r = \pt -> (mag (pos-pt) - r, defaultMaterial)
 -- | Defines a cube at a given center position and with a given radius (radius being half of the sidelength)
 cube :: Position -> Radius -> Scene
 cube pos r = moveScene pos
-           $ \(Vec3 (px,py,pz)) -> (mag $ Vec3 (f px, f py, f pz), defaultMaterial)
+           $ \point -> (mag $ mapVec f point, defaultMaterial)
   where f x = max 0 (abs x - r)
 
 -- | Combines two scenes into a single scene. Equivalent to 'sceneOr'
@@ -304,8 +307,7 @@ data ImageSettings = ImageSettings
 
 -- | Clamps a color so that every component is between 0 and 1
 clamp :: Color -> Color
-clamp (Vec3 (r, g, b)) = Vec3 (clampFloat r, clampFloat g, clampFloat b)
-    where clampFloat f = max 0 (min 1 f)
+clamp = mapVec (max 0 . min 1)
 
 -- | Prepares a color for outputting
 colorToRGB :: (Integral a, Integral b, Integral c)
