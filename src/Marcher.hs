@@ -56,6 +56,9 @@ newtype Vec3 = Vec3 (Double, Double, Double) deriving (Show,Eq)
 mapVec :: (Double -> Double) -> Vec3 -> Vec3
 mapVec f (Vec3 (a,b,c)) = Vec3 (f a,f b,f c)
 
+foldVec :: (Double -> Double -> Double) -> Vec3 -> Double
+foldVec f (Vec3 (a,b,c)) = f a (f b c)
+
 instance Num Vec3 where
     (Vec3 (x, y, z)) + (Vec3 (x1, y1, z1)) = Vec3 ((x + x1), (y + y1), (z + z1))
     negate = mapVec negate
@@ -67,7 +70,7 @@ instance Num Vec3 where
 
 
 -- | The dot product of two vectors
-x `dot` y = x * y
+x `dot` y = foldVec (+) $ x * y
 -- | Scale a vector's magnitude by a number.
 a `scale` v = mapVec (*a) v
 
@@ -232,9 +235,9 @@ sphere pos r = \pt -> (mag (pos-pt) - r, defaultMaterial)
 
 -- | Defines a cube at a given center position and with a given radius (radius being half of the sidelength)
 cube :: Position -> Radius -> Scene
-cube pos r = moveScene pos
-           $ \point -> (mag $ mapVec f point, defaultMaterial)
-  where f x = max 0 (abs x - r)
+cube pos r = moveScene pos $ \point ->
+             let q = mapVec (subtract r) $ mapVec abs point
+                in (mag (mapVec (max 0) q) + min 0 (foldVec max q), defaultMaterial)
 
 -- | Combines two scenes into a single scene. Equivalent to 'sceneOr'
 mergeScenes :: Scene -> Scene -> Scene
