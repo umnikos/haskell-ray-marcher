@@ -12,4 +12,4 @@ main :: IO ()
 main = do
   let rays = getRays setting
   let colors = map (map (colorToRGB . rayRender setting myScene)) rays -- 2D list of triples(RGB Integer values).
-  writePPM "shapeDemo.ppm" colors
+  writePPM "rayMarch.ppm" colors
