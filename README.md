@@ -1,5 +1,5 @@
 # haskell ray marcher
-*A ray marcher in Haskell, up to be implemented.*
+*A minimal ray marcher in Haskell*
 
 ### Requirements:
     - Stack version: 2.1.3
