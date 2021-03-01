@@ -202,8 +202,10 @@ getRays setting = [[ (Vec3 (0, 0, 0), normalize (Vec3 (x, (-y), z)) ) -- First R
                    | x <- widthCoords setting ]
                    | y <- heightCoords setting ]
     where z = (tan (pi - getFieldOfView setting / 2))
-          widthCoords setting = spacedPoints $ getImageWidth setting
-          heightCoords setting = spacedPoints $ getImageHeight setting
+          widthCoords setting = (/toEnum imageHeight) <$> (*toEnum imageWidth) <$> spacedPoints imageWidth
+          heightCoords setting = spacedPoints imageHeight
+          imageWidth = getImageWidth setting
+          imageHeight = getImageHeight setting
 
 
 -- | Generates N doubles from -1 to 1, equally spaced.
@@ -330,7 +332,7 @@ writePPM fileName img = do
 ------------------------------------------------------------
 
 -- | Default image settings.
-defaultSettings = ImageSettings 1280 1280 (pi/2) 100 0.00001 black (white, (Vec3 (10,10,(10-3))))
+defaultSettings = ImageSettings 1280 720 (pi/2) 100 0.00001 black (white, (Vec3 (10,10,(10-3))))
 
 -- | An example scene. May change over time, so don't use as anything other than a placeholder.
 defaultScene :: Scene
