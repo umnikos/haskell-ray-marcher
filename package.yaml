@@ -42,7 +42,6 @@ executables:
 
 tests:
   hmarch-test:
-    spec:
     defaults: hspec/hspec@master
     ghc-options:
     - -threaded

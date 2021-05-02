@@ -2,8 +2,8 @@
 *A minimal ray marcher in Haskell*
 
 ### Requirements:
-    - Stack version: 2.1.3
-    - hpack version: 0.31.2
+    - Stack (build tool)
+    - gmp (arithmetic library)
 
 ### How to build:
 ```sh
